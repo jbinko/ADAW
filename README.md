@@ -47,12 +47,23 @@ You probably also want to mask data and secure/hide data which should not be see
 
 For that, you need to understand (propagate security context) who is viewing the data from reporting tool to structured storage
 and ensure you are filtering data for target user based on role. (Role Based Access Control, Row Level Security).
-You do not want to do it programmatically (like in WHERE clause), database engine should do it for you.
+You do not want to do it manually, database engine should do it for you based on roles.
 
 ### Architecture in Azure components
 
 Let's have a look how architecture described above can be translated into specific Azure services.
 ![Architecture Overview](DocImages/Overview.png)
+
+#### Key Components in the solution
+
+- Azure Data Lake Storage
+- Azure SQL Database
+- Azure Databricks
+- Azure Data Factory
+- Azure Storage, Azure Key Vault and Azure Monitor + Log Analytics as tools for monitoring, security and audit
+- Power BI Premium + VNET Integration - Optional
+- Azure Data Factory Self HostIntegration Runtime - Optional
+- Azure Machine Learning - Optional
 
 _**Business Users needs to present, consume, slice and dice data in quick way on multiple devices from multiple places**_
 
@@ -98,3 +109,40 @@ of massive parallel processing of data. To provide even better security story, A
 
 Storage will not be accessed directly by PowerBI (although technically possible and supported). Storage is kind of staging area in this case.
 PowerBI should work with more structured and optimized domain driven data source built from raw data from storage.
+
+_**Store data in structured way with indexing capability to provide speed for access. Data model which is optimized (transformed) for data domain data are aligned to.**_
+
+Once the data are snapshot and available in cheap storage in raw, versioned and complete form, it's time to transform them to the most useful product.
+As domain data model expectations changes during a time it's very useful to keep data in complete, raw form and with history.
+This allows at any point in time to introduce new dimension or attribute to domain data model with projection to the history.
+
+ADAW supports transformations of data in mainly two ways (Azure Data Factory and Azure Databricks).
+Both very capable and scalable tools with rich transformational features and adapters.
+
+Solution was designed for reading data from Azure Data Lake Storage through private endpoint (part of perimeter), cleaning/normalizing data at scale,
+transforming at scale, aggregating/merging/combining data at scale and with cost control (Azure Data Factory and/or Azure Databricks - fast transformation with more horse power for higher cost vs slower transformation with less power for better price) and storing cleaned/transformed/aggregated and domain optimized data to highly structured database with indexed data and business/domain specific vocabulary (Azure SQL Database).
+
+Azure Databricks should be deployed with Premium SKU to enable advanced security features like RBAC for Cluster, Jobs, Notebooks and Azure AD passthrough.
+Also Azure Databricks Virtual Network integrated with data sources and perimeter and Firewall for egress control should be enabled.
+
+Azure Data Factory and Azure Databricks Workspace (not data) can be accessed through public endpoint with Azure Active Directory Authentication and enabled conditional access.
+
+Azure SQL Database in this solution is playing key role as data source consumed by PowerBI clients. Model is optimized for business domain, for PowerBI reports,
+with right business terminology and attributes and security trimming done at the database engine level through native capabilities.
+Also PowerBI is configured in the way to consume data over private endpoints from Azure SQL Database (point-to-point) and
+ingest data from Azure Databricks / Azure Data Factory Self Host Integration Runtime to improve security posture.
+
+_**Mask data and secure/hide data which should not be seen by users from other geo regions or departments.**_
+
+Data stored in the business data domain database (here Azure SQL Database) will probably contain data across whole organization and with sensitive data.
+It's important to allow access only to subset of data based on roles accessing user belongs to. Typically data cross regions from different units
+in different geo locations, etc.
+It's not best approach to do such filtering manually in code (error prone) and also it is not desired to do it in reports itself.
+Such filtering based on security context should be done purely on the database level and all other consuming tools (including reporting tools)
+will receive already filtered data. Accessing tools should pass identity of viewing user - not service accounts.
+This allows to stay compliant with different auditing and traceability requirements.
+
+Fortunately, Azure SQL Database implements such native features on the database engine level (row-level security) which makes implementation of such security trimming and auditing easier.
+
+This requires to propagate security context from viewing user to the database level. PowerBI is able to understand a propagate security context (user cloud identity)
+to the business data domain database and database is able to use such identity, authenticate, authorize and filter data for such user based on the identity or roles this user belongs to.
