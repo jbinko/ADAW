@@ -149,9 +149,9 @@ to the business data domain database and database is able to use such identity, 
 
 ## Deployment
 
-Deployment of Azure Data Analytical Workspace can be done through provided Azure Resource Manager [ADAW.bicep](ADAW/blob/main/DeploymentScripts/ADAW.bicep) file or via generated Azure Resource Manager Template file [ADAW.json](ADAW/blob/main/DeploymentScripts/ADAW.json) which itself is based on ARM Bicep file.
+Deployment of Azure Data Analytical Workspace can be done through provided Azure Resource Manager [ADAW.bicep](DeploymentScripts/ADAW.bicep) file or via generated Azure Resource Manager Template file [ADAW.json](DeploymentScripts/ADAW.json) which itself is based on ARM Bicep file.
 
-You can find those script files in [DeploymentScripts](ADAW/blob/main/DeploymentScripts) directory.
+You can find those script files in [DeploymentScripts](DeploymentScripts) directory.
 
 Deployment file will provision resources which are part of Azure Data Analytical Workspace which you can see in the high level architecture diagram above.
 
