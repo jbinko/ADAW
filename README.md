@@ -146,3 +146,19 @@ Fortunately, Azure SQL Database implements such native features on the database 
 
 This requires to propagate security context from viewing user to the database level. PowerBI is able to understand a propagate security context (user cloud identity)
 to the business data domain database and database is able to use such identity, authenticate, authorize and filter data for such user based on the identity or roles this user belongs to.
+
+## Deployment
+
+Deployment of Azure Data Analytical Workspace can be done through provided Azure Resource Manager [ADAW.bicep](ADAW/tree/master/DeploymentScripts/ADAW.bicep) file or via generated Azure Resource Manager Template file [ADAW.json](ADAW/tree/master/DeploymentScripts/ADAW.json) based on ARM Bicep file.
+You can find those script files in [DeploymentScripts](ADAW/tree/master/DeploymentScripts) directory.
+Deployment file will provision resources which are part of Azure Data Analytical Workspace which you can see in the high level architecture diagram above.
+Azure Data Factory Self Host Integration Runtime, MFA, Conditional Access, Power BI Premium and Virtual Network Integration for Power BI Premium are not part of this script as they are more external components and configurations.
+More technical description of deployment options for resources is described below.
+
+### Deployment Example
+
+```bash
+az group create --name ADAW --location NorthEurope --tags Costcenter=ABC001 Owner='Bob' --subscription "Subscription001"
+
+az deployment group create -n ADAW -g ADAW -f ADAW.bicep --parameters projectPrefix=proj01 securityOwnerAADLogin=adawAdmin@xyz.com securityOwnerAADId=00000000-0000-0000-0000-000000000000 securityAlertEmail=adawAdmin@xyz.com sqlServerLogin=myUserName sqlServerPassword=myPassword virtualApplianceIPAddress=192.168.0.4 --subscription "Subscription001"
+```
