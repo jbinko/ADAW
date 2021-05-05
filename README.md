@@ -165,3 +165,25 @@ az group create --name ADAW --location NorthEurope --tags Costcenter=ABC001 Owne
 
 az deployment group create -n ADAW -g ADAW -f ADAW.bicep --parameters projectPrefix=proj01 securityOwnerAADLogin=adawAdmin@xyz.com securityOwnerAADId=00000000-0000-0000-0000-000000000000 securityAlertEmail=adawAdmin@xyz.com sqlServerLogin=myUserName sqlServerPassword=myPassword virtualApplianceIPAddress=192.168.0.4 --subscription "Subscription001"
 ```
+
+### Deployment parameters
+
+Following parameters can be / must be passed into template file to provision environment with specific values.
+
+- projectPrefix / required - Prefix for a project resources. Min 3, max 7
+- securityOwnerAADLogin / required - Specifies the login ID (Login Name) of a user in the Azure Active Directory tenant. Min 1
+- securityOwnerAADId / required - Specifies the login ID (Object ID) of a user in the Azure Active Directory tenant. Min 1
+- securityAlertEmail / required - Specifies the email address where security findings will be sent for further analysis. Min 5
+- sqlServerLogin / required - Specifies the Administrator login for SQL Server. Min 6
+- sqlServerPassword / required - Specifies the Administrator password for SQL Server. Min 12
+- location / optional - default value from resource group location
+- resourceTags / optional - default value from resource group
+- vNetPrefix / optional - default value 10.0.0.0/16
+- subnetControlPlanePrefix / optional - default value 10.0.0.0/20
+- subnetDataPlanePrefix / optional - default value 10.0.16.0/20
+- subnetPrivateLinkPrefix / optional - default value 10.0.32.0/23
+- logRetentionInDays / optional - default value 120 days
+- securityEmailAdmins / optional - Specifies if the security alert is sent to the account administrators. Default value is false.
+- sqlServerDBSkuName / optional - Specifies the SKU for Azure SQL Database. Typically a letter + Number code. S0 - S12, P1 - P15. Default value is S0.
+- sqlServerDBTierName / optional - Specifies the tier or edition for Azure SQL Database. Basic, Standard, Premium. Default value is Standard.
+- virtualApplianceIPAddress / optional - Specifies the IP Address of Virtual Network Appliance (Firewall) into which traffic from the Virtual Network will be routed to. Default value is empty (no routing).
