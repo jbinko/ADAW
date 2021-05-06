@@ -67,7 +67,7 @@ Let's have a look how architecture described above can be translated into specif
 
 _**Business Users needs to present, consume, slice and dice data in quick way on multiple devices from multiple places**_
 
-This can be achieved by easy to use PowerBI reporting tool, which can be used from anywhere and on multiple platforms and devices.
+This can be achieved by easy-to-use PowerBI reporting tool, which can be used from anywhere and on multiple platforms and devices.
 
 PowerBI runs in cloud as managed service. Service can be also integrated with perimeter for access from devices and can also access
 data sources which are part of perimeter (on-premises or in cloud via private link). This PowerBI Premium VNET integration feature is in preview now.
@@ -89,13 +89,13 @@ which will first get data from multiple data sources from many places, in raw fo
 
 In this architecture load is mainly role of Azure Data Factory - Easy to use ETL tool along with Azure Storage in Azure Data Lake (Hierarchical namespace) mode.
 
-Azure Data Factory managed PaaS service allows you to connect many data sources through massive list of ever growing list of supported connectors.
+Azure Data Factory managed PaaS service allows you to connect many data sources through massive list of ever-growing list of supported connectors.
 Azure Data Factory has a workspace where ETL process can be designed and executed at scale. Workspace can be accessed from anywhere as access policy
 allows and is specified by security administrators. Similar approach like accessing O365 workspace.
 
 Azure Data Factory also understands and can store data in multiple file formats (standard or proprietary).
 Azure Data Factory can access data and store them in scalable manner as snapshots to Azure Data Lake Storage.
-Basically get data in scalable way from anywhere and store them in raw format to Azure Data Lake Storage in versioned way so more
+Basically, get data in scalable way from anywhere and store them in raw format to Azure Data Lake Storage in versioned way so more
 sophisticated data models can be built based on such data.
 
 To access data sources from cloud you need to have some kind of gateway which will not require to punch hole into the enterprise firewall. This
@@ -112,7 +112,7 @@ PowerBI should work with more structured and optimized domain driven data source
 
 _**Store data in structured way with indexing capability to provide speed for access. Data model which is optimized (transformed) for data domain data are aligned to.**_
 
-Once the data are snapshot and available in cheap storage in raw, versioned and complete form, it's time to transform them to the most useful product.
+Once the data are snapshot and available in cheap storage in raw, versioned, and complete form, it's time to transform them to the most useful product.
 As domain data model expectations changes during a time it's very useful to keep data in complete, raw form and with history.
 This allows at any point in time to introduce new dimension or attribute to domain data model with projection to the history.
 
@@ -135,7 +135,7 @@ ingest data from Azure Databricks / Azure Data Factory Self Host Integration Run
 _**Mask data and secure/hide data which should not be seen by users from other geo regions or departments.**_
 
 Data stored in the business data domain database (here Azure SQL Database) will probably contain data across whole organization and with sensitive data.
-It's important to allow access only to subset of data based on roles accessing user belongs to. Typically data cross regions from different units
+It's important to allow access only to subset of data based on roles accessing user belongs to. Typically, data cross regions from different units
 in different geo locations, etc.
 It's not best approach to do such filtering manually in code (error prone) and also it is not desired to do it in reports itself.
 Such filtering based on security context should be done purely on the database level and all other consuming tools (including reporting tools)
@@ -144,7 +144,7 @@ This allows to stay compliant with different auditing and traceability requireme
 
 Fortunately, Azure SQL Database implements such native features on the database engine level (row-level security) which makes implementation of such security trimming and auditing easier.
 
-This requires to propagate security context from viewing user to the database level. PowerBI is able to understand a propagate security context (user cloud identity)
+This requires propagating security context from viewing user to the database level. PowerBI can understand a propagate security context (user cloud identity)
 to the business data domain database and database is able to use such identity, authenticate, authorize and filter data for such user based on the identity or roles this user belongs to.
 
 ## Deployment
@@ -153,10 +153,10 @@ Deployment of Azure Data Analytical Workspace can be done through provided Azure
 
 You can find those script files in [DeploymentScripts](DeploymentScripts) directory.
 
-Deployment file will provision resources which are part of Azure Data Analytical Workspace which you can see in the high level architecture diagram above.
+Deployment file will provision resources which are part of Azure Data Analytical Workspace which you can see in the high-level architecture diagram above.
 
 Azure Data Factory Self Host Integration Runtime, MFA, Conditional Access, Power BI Premium and Virtual Network Integration for Power BI Premium are not part of this script as they are more external components and configurations.
-More technical description of deployment options for resources is described later.
+More technical description of deployment options for resources and implementation details are described later.
 
 ### Deployment Example
 
@@ -170,20 +170,60 @@ az deployment group create -n ADAW -g ADAW -f ADAW.bicep --parameters projectPre
 
 Following parameters can be / must be passed into template file to provision environment with specific values.
 
-- projectPrefix / required - Prefix for a project resources. Min 3, max 7
-- securityOwnerAADLogin / required - Specifies the login ID (Login Name) of a user in the Azure Active Directory tenant. Min 1
-- securityOwnerAADId / required - Specifies the login ID (Object ID) of a user in the Azure Active Directory tenant. Min 1
-- securityAlertEmail / required - Specifies the email address where security findings will be sent for further analysis. Min 5
-- sqlServerLogin / required - Specifies the Administrator login for SQL Server. Min 6
-- sqlServerPassword / required - Specifies the Administrator password for SQL Server. Min 12
-- location / optional - default value from resource group location
-- resourceTags / optional - default value from resource group
-- vNetPrefix / optional - default value 10.0.0.0/16
-- subnetControlPlanePrefix / optional - default value 10.0.0.0/20
-- subnetDataPlanePrefix / optional - default value 10.0.16.0/20
-- subnetPrivateLinkPrefix / optional - default value 10.0.32.0/23
-- logRetentionInDays / optional - default value 120 days
-- securityEmailAdmins / optional - Specifies if the security alert is sent to the account administrators. Default value is false.
-- sqlServerDBSkuName / optional - Specifies the SKU for Azure SQL Database. Typically a letter + Number code. S0 - S12, P1 - P15. Default value is S0.
-- sqlServerDBTierName / optional - Specifies the tier or edition for Azure SQL Database. Basic, Standard, Premium. Default value is Standard.
-- virtualApplianceIPAddress / optional - Specifies the IP Address of Virtual Network Appliance (Firewall) into which traffic from the Virtual Network will be routed to. Default value is empty (no routing).
+- ```projectPrefix``` - required - Prefix for a project resources.
+Each provisioned resource will use this prefix. This is for sorting / searching resources mainly.
+
+- ```securityOwnerAADLogin``` - required - Specifies the login ID (Login Name) of a user in the Azure Active Directory tenant.
+Resources which support Azure Active Directory for Authentication (like Azure SQL Database) will use
+such specified account and assign this account in Administrator role to the account.
+This account is ultimate owner of the solution with highest permissions.
+
+- ```securityOwnerAADId``` - required - Specifies the login ID (Object ID) of a user in the Azure Active Directory tenant.
+This is ID of the user which must correspond to the parameter ```securityOwnerAADLogin```.
+Resources which support Azure Active Directory for Authentication (like Azure Key Vault) will use
+such specified ID and assign this account in Administrator role to the account.
+This account is ultimate owner of the solution with highest permissions.
+
+- ```securityAlertEmail``` - required - Specifies the email address where security findings will be sent for further analysis.
+This is mainly for any potential and suspicious security issues which should be further investigated.
+Based on Azure Alert Policies and Azure Vulnerability Assessments on Azure SQL Database.
+
+- ```sqlServerLogin``` - required - Specifies the Administrator login for SQL Server.
+Azure SQL Database requires SQL Database Authentication (Username and password) be specified even though
+Azure Active Directory is enabled.
+This will be changed in the future and only Azure Active Directory will be enabled for Authentication.
+
+- ```sqlServerPassword``` - required - Specifies the Administrator password for SQL Server.
+Azure SQL Database requires SQL Database Authentication (Username and password) be specified even though
+Azure Active Directory is enabled.
+This will be changed in the future and only Azure Active Directory will be enabled for Authentication.
+
+- ```location``` - optional - Target region/location for deployment of resources. Default value is taken from the target resource group location.
+
+- ```resourceTags``` - optional - Tags to be associated with deployed resources. Default tags are taken from the target resource group.
+
+- ```vNetPrefix``` - optional - This is virtual network address space range for the solution. Default value is 10.0.0.0/16.
+If this VNET needs to be peered and/or routed through Enterprise Firewall, make sure the address space is not in the collision with
+existing networks. This VNET hosts at least three subnets. Should not be smaller than /24 and each subnet at least /26.
+
+- ```subnetControlPlanePrefix``` - optional - This is subnet range from virtual network address space range above
+for Azure Databricks control plane component. Default value is 10.0.0.0/20. Should not be smaller than /26.
+
+- ```subnetDataPlanePrefix``` - optional - This is subnet range from virtual network address space range above
+for Azure Databricks data plane component. Default value is 10.0.16.0/20. Should not be smaller than /26.
+
+- ```subnetPrivateLinkPrefix``` - optional - This is subnet range from virtual network address space range above
+for hosting private link resources. Default value is 10.0.32.0/23. Should not be smaller than /26.
+
+- ```logRetentionInDays``` - optional - This value specifies for how long diagnostics, audit, security logs for Azure resources
+should be kept in Log Analytics Workspace. Long retention period can have cost impact. Default value is 120 days.
+
+- ```securityEmailAdmins``` - optional - Specifies if the security alert / security findings will be sent to the
+Azure subscription administrators in an addition to the email in ```securityAlertEmail``` parameter. Default value is false.
+
+- ```sqlServerDBSkuName``` - optional - Specifies the SKU for Azure SQL Database. Typically, a letter + Number code. S0 - S12, P1 - P15. Default value is S0.
+
+- ```sqlServerDBTierName``` - optional - Specifies the tier or edition for Azure SQL Database. Basic, Standard, Premium. Default value is Standard.
+
+- ```virtualApplianceIPAddress``` - optional - Specifies the IP Address of Virtual Network Appliance (Firewall) into which traffic from the Virtual Network will be routed to. Default value is empty (no routing).
+Virtual Network from the parameter ```vNetPrefix``` needs to be peered / connected with network where Virtual Network Appliance (Firewall) is hosted.
