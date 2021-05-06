@@ -175,16 +175,16 @@ Each provisioned resource will use this prefix. This is for sorting / searching 
 
 - ```securityOwnerAADLogin``` - required - Specifies the login ID (Login Name) of a user in the Azure Active Directory tenant.
 Resources which support Azure Active Directory for Authentication (like Azure SQL Database) will use
-such specified account and assign this account in Administrator role to the account.
-This account is ultimate owner of the solution with highest permissions.
+such specified account and assign this account into Administrator role.
+This account is ultimate owner of the solution with the highest permissions.
 
 - ```securityOwnerAADId``` - required - Specifies the login ID (Object ID) of a user in the Azure Active Directory tenant.
 This is ID of the user which must correspond to the parameter ```securityOwnerAADLogin```.
 Resources which support Azure Active Directory for Authentication (like Azure Key Vault) will use
-such specified ID and assign this account in Administrator role to the account.
-This account is ultimate owner of the solution with highest permissions.
+such specified ID and assign this account into Administrator role.
+This account is ultimate owner of the solution with the highest permissions.
 
-- ```securityAlertEmail``` - required - Specifies the email address where security findings will be sent for further analysis.
+- ```securityAlertEmail``` - required - Specifies the customer's email address where any security findings will be sent for further review.
 This is mainly for any potential and suspicious security issues which should be further investigated.
 Based on Azure Alert Policies and Azure Vulnerability Assessments on Azure SQL Database.
 
@@ -204,15 +204,15 @@ This will be changed in the future and only Azure Active Directory will be enabl
 
 - ```vNetPrefix``` - optional - This is virtual network address space range for the solution. Default value is 10.0.0.0/16.
 If this VNET needs to be peered and/or routed through Enterprise Firewall, make sure the address space is not in the collision with
-existing networks. This VNET hosts at least three subnets. Should not be smaller than /24 and each subnet at least /26.
+existing networks or provide other non-collision value. This VNET hosts at least three subnets. Should not be smaller than /24 and each subnet at least /26.
 
-- ```subnetControlPlanePrefix``` - optional - This is subnet range from virtual network address space range above
+- ```subnetControlPlanePrefix``` - optional - This is subnet range from virtual network address space above
 for Azure Databricks control plane component. Default value is 10.0.0.0/20. Should not be smaller than /26.
 
-- ```subnetDataPlanePrefix``` - optional - This is subnet range from virtual network address space range above
+- ```subnetDataPlanePrefix``` - optional - This is subnet range from virtual network address space above
 for Azure Databricks data plane component. Default value is 10.0.16.0/20. Should not be smaller than /26.
 
-- ```subnetPrivateLinkPrefix``` - optional - This is subnet range from virtual network address space range above
+- ```subnetPrivateLinkPrefix``` - optional - This is subnet range from virtual network address space above
 for hosting private link resources. Default value is 10.0.32.0/23. Should not be smaller than /26.
 
 - ```logRetentionInDays``` - optional - This value specifies for how long diagnostics, audit, security logs for Azure resources
@@ -226,4 +226,4 @@ Azure subscription administrators in an addition to the email in ```securityAler
 - ```sqlServerDBTierName``` - optional - Specifies the tier or edition for Azure SQL Database. Basic, Standard, Premium. Default value is Standard.
 
 - ```virtualApplianceIPAddress``` - optional - Specifies the IP Address of Virtual Network Appliance (Firewall) into which traffic from the Virtual Network will be routed to. Default value is empty (no routing).
-Virtual Network from the parameter ```vNetPrefix``` needs to be peered / connected with network where Virtual Network Appliance (Firewall) is hosted.
+Virtual Network from the parameter ```vNetPrefix``` needs to be peered / connected with virtual network where Virtual Network Appliance (Firewall) is hosted.
