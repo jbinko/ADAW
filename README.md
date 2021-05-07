@@ -227,3 +227,41 @@ Azure subscription administrators in an addition to the email in ```securityAler
 
 - ```virtualApplianceIPAddress``` - optional - Specifies the IP Address of Virtual Network Appliance (Firewall) into which traffic from the Virtual Network will be routed to. Default value is empty (no routing).
 Virtual Network from the parameter ```vNetPrefix``` needs to be peered / connected with virtual network where Virtual Network Appliance (Firewall) is hosted.
+
+## Implementation Details
+
+Following is a description of settings for each resource of the solution. This should provide information about
+why values are set in the way they are set, what is the idea behind, security level, limitations etc.
+
+Generally, each resource which supports diagnostics logs will redirect all those logs into Log Analytics Workspace
+to provide monitoring, and security auditing.
+
+Private link feature for resources is leveraged as much as possible, unless some functionality would be limited.
+In such case this is mentioned and documented.
+
+All non-global resources are created in the region specified in the input template parameter ```location```.
+
+All resources which can be tagged, are tagged explicitly with values coming from input template parameter ```resourceTags```.
+
+### Private Link Zones
+
+Following private link zones are created. These zones enables private link feature for Azure storage, Azure Key Vault, Azure SQL Database, etc.
+Zones are linked with provisioned virtual network to provide DNS resolution for private link feature inside virtual network.
+
+- privatelink.blob.core.windows.net
+- privatelink.dfs.core.windows.net
+- privatelink.vaultcore.azure.net
+- privatelink.database.windows.net
+
+### Log Analytics
+
+Log Analytics is used in this solution as monitoring and diagnostics tool. All logs from all resources which can produce logs
+and can be redirected to Log Analytics are redirect into Log Analytics for storage with given retention period (input parameter ```logRetentionInDays```).
+
+Log Analytics is exposed over public endpoint to allow troubleshooting even in cases perimeter or virtual network doesn't work.
+Log Analytics workspace is protected and can be accessed only via Azure Active Directory.
+
+Pricing model is based on price per GB.
+No capacity reservation level is enabled for this workspace.
+No daily quota ingestion capping is enabled.
+Query and ingestion over public network is Disabled.
