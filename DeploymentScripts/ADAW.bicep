@@ -81,6 +81,7 @@ var laUniqueName = '${projectPrefix}-adaw-la'
 
 var vNetName = '${projectPrefix}-adaw-vnet'
 var vNetNsgFlowLogRetentionInDays = 31
+var useDdosProtectionPlan = false
 
 var saDiagUniqueName = '${projectPrefix}adawdiagsa'
 var saLakeUniqueName = '${projectPrefix}adawlakesa'
@@ -297,7 +298,7 @@ resource la_diagnostics 'Microsoft.Insights/diagnosticSettings@2017-05-01-previe
 
 // ----- NETWORKING
 
-resource ddosProtectionPlan 'Microsoft.Network/ddosProtectionPlans@2020-08-01' = {
+resource ddosProtectionPlan 'Microsoft.Network/ddosProtectionPlans@2020-08-01' = if (useDdosProtectionPlan) {
   name: '${projectPrefix}-adaw-ddos-plan'
   location: location
   tags: resourceTags
@@ -645,11 +646,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-07-01' = {
         }
       }
     ]
-    enableDdosProtection: true
     enableVmProtection: true
-    ddosProtectionPlan: {
-      id: ddosProtectionPlan.id
-    }
+    enableDdosProtection: useDdosProtectionPlan
+    ddosProtectionPlan: useDdosProtectionPlan ? json('{"id":"${ddosProtectionPlan.id}"}') : json('null')
   }
 }
 

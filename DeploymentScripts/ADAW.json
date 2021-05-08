@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.3.255.40792",
-      "templateHash": "13549544877319830461"
+      "templateHash": "16958664991491068299"
     }
   },
   "parameters": {
@@ -139,6 +139,7 @@
     "laUniqueName": "[format('{0}-adaw-la', parameters('projectPrefix'))]",
     "vNetName": "[format('{0}-adaw-vnet', parameters('projectPrefix'))]",
     "vNetNsgFlowLogRetentionInDays": 31,
+    "useDdosProtectionPlan": false,
     "saDiagUniqueName": "[format('{0}adawdiagsa', parameters('projectPrefix'))]",
     "saLakeUniqueName": "[format('{0}adawlakesa', parameters('projectPrefix'))]",
     "kvUniqueName": "[format('{0}-adaw-kv', parameters('projectPrefix'))]",
@@ -364,6 +365,7 @@
       ]
     },
     {
+      "condition": "[variables('useDdosProtectionPlan')]",
       "type": "Microsoft.Network/ddosProtectionPlans",
       "apiVersion": "2020-08-01",
       "name": "[format('{0}-adaw-ddos-plan', parameters('projectPrefix'))]",
@@ -721,11 +723,9 @@
             }
           }
         ],
-        "enableDdosProtection": true,
         "enableVmProtection": true,
-        "ddosProtectionPlan": {
-          "id": "[resourceId('Microsoft.Network/ddosProtectionPlans', format('{0}-adaw-ddos-plan', parameters('projectPrefix')))]"
-        }
+        "enableDdosProtection": "[variables('useDdosProtectionPlan')]",
+        "ddosProtectionPlan": "[if(variables('useDdosProtectionPlan'), json(format('{{\"id\":\"{0}\"}}', resourceId('Microsoft.Network/ddosProtectionPlans', format('{0}-adaw-ddos-plan', parameters('projectPrefix'))))), json('null'))]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/ddosProtectionPlans', format('{0}-adaw-ddos-plan', parameters('projectPrefix')))]",
