@@ -265,3 +265,76 @@ Pricing model is based on price per GB.
 No capacity reservation level is enabled for this workspace.
 No daily quota ingestion capping is enabled.
 Query and ingestion over public network is Disabled.
+
+Diagnostic Settings of Log Analytics is redirected into Log Analytics itself with retention period ```logRetentionInDays```.
+
+### Networking
+
+Solution creates and uses Azure Virtual Network to host some Azure services.
+This allows to integrate and protect Azure resources as part of the perimeter via private link feature.
+
+Azure Virtual Network consist of following subnets:
+
+- control-plane
+- data-plane
+- private-link
+
+Also communication of Azure Services can be routed (when needed) through Central Network Virtual Appliance.
+For this, you need to specify parameter ```virtualApplianceIPAddress``` which will configure route table on
+subnets to redirect ```'0.0.0.0/0'``` traffic to the Network Virtual Appliance listening on the IP Address ```virtualApplianceIPAddress```.
+Obviously, you need to also create network peering with Virtual Network where your Network Virtual Appliance is located.
+Creating network peering is manual step on your side and is not part of this script.
+
+Azure DDoS Protection is currently disabled by default on Virtual Network level.
+Variable ```useDdosProtectionPlan``` can be changed to value ```true``` to enable Azure DDoS Protection.
+
+VM protection is enabled for all the subnets in the virtual network.
+
+Each subnet of Azure Virtual Network has associated network security group and diagnostic settings of network security group.
+
+#### control-plane subnet and network security group
+
+This subnet is for integrating with Azure Databricks control plane.
+
+This script creates two rules in network security group for this subnet.
+
+- Deny all incoming communication
+- Deny all outgoing communication.
+
+Databricks itself modifies this network security group to additionally add any incoming communication from whole virtual network,
+allows outgoing communication to whole virtual network, outgoing Azure Databricks (port 443), outgoing Azure MySQL DB (port 3306),
+outgoing Azure Storage (port 443) and outgoing Azure Event Hub (port 9093).
+
+Diagnostic settings of network security group is redirected into Log Analytics.
+
+#### data-plane subnet and network security group
+
+This subnet is for hosting data nodes which are part of Azure Databricks clusters.
+
+This script creates four rules in network security group for this subnet.
+
+- Deny all incoming communication.
+- Allow outgoing communication to port 433 to private link subnet, so data nodes can consume Azure Services attached via private link feature.
+- Allow outgoing communication to port 1433 to private link subnet, so data nodes can consume Azure SQL Database attached via private link feature.
+- Deny all the other outgoing communication.
+
+Databricks itself modifies this network security group to additionally add any incoming communication from whole virtual network,
+allows outgoing communication to whole virtual network, outgoing Azure Databricks (port 443), outgoing Azure MySQL DB (port 3306),
+outgoing Azure Storage (port 443) and outgoing Azure Event Hub (port 9093).
+
+Diagnostic settings of network security group is redirected into Log Analytics.
+
+#### private-link subnet and network security group
+
+This subnet is for hosting private link resources which are part of the solution.
+Out of the box it is Azure Data Lake Store, Azure SQL Database and Azure Key Vault. More can be added.
+
+This script creates four rules in network security group for this subnet.
+
+- Allow incoming communication to port 433 from data-plane subnet, so data nodes can consume Azure Services attached via private link feature.
+- Allow incoming communication to port 1433 from data-plane subnet, so data nodes can consume Azure SQL Database attached via private link feature.
+- Deny all the other incoming communication.
+- Deny all outgoing communication.
+
+This network security group is not modified by Azure Databricks.
+Diagnostic settings of network security group is redirected into Log Analytics.
