@@ -1170,9 +1170,9 @@ resource sql_devOpsAuditing 'Microsoft.Sql/servers/devOpsAuditingSettings@2020-0
   }
 }
 
-resource sql_securityAlertPolicies 'Microsoft.Sql/servers/securityAlertPolicies@2020-08-01-preview' = {
+resource sql_securityAlertPolicies 'Microsoft.Sql/servers/securityAlertPolicies@2020-11-01-preview' = {
   dependsOn: [
-    sql_auditingRoleAssignment
+    sql_devOpsAuditing
   ]
   name: '${sql.name}/default'
   properties: {
@@ -1183,7 +1183,7 @@ resource sql_securityAlertPolicies 'Microsoft.Sql/servers/securityAlertPolicies@
       securityAlertEmail
     ]
     emailAccountAdmins: securityEmailAdmins
-    storageEndpoint: sadiag.properties.primaryEndpoints.blob
+    //storageEndpoint: sadiag.properties.primaryEndpoints.blob
     //storageAccountAccessKey: listKeys(sadiag.id, sadiag.apiVersion).keys[0].value
     retentionDays: logRetentionInDays
   }

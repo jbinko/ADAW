@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.3.255.40792",
-      "templateHash": "16958664991491068299"
+      "version": "0.3.539.46024",
+      "templateHash": "12364151769941875615"
     }
   },
   "parameters": {
@@ -1308,7 +1308,7 @@
     },
     {
       "type": "Microsoft.Sql/servers/securityAlertPolicies",
-      "apiVersion": "2020-08-01-preview",
+      "apiVersion": "2020-11-01-preview",
       "name": "[format('{0}/default', variables('sqlServerUniqueName'))]",
       "properties": {
         "state": "Enabled",
@@ -1317,13 +1317,11 @@
           "[parameters('securityAlertEmail')]"
         ],
         "emailAccountAdmins": "[parameters('securityEmailAdmins')]",
-        "storageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName'))).primaryEndpoints.blob]",
         "retentionDays": "[parameters('logRetentionInDays')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName'))]",
         "[resourceId('Microsoft.Sql/servers', variables('sqlServerUniqueName'))]",
-        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName')), 'Microsoft.Authorization/roleAssignments', '55A640A4-E94B-4E75-B7DA-1312A7B66874')]"
+        "[resourceId('Microsoft.Sql/servers/devOpsAuditingSettings', split(format('{0}/default', variables('sqlServerUniqueName')), '/')[0], split(format('{0}/default', variables('sqlServerUniqueName')), '/')[1])]"
       ]
     },
     {
@@ -1763,8 +1761,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.3.255.40792",
-              "templateHash": "12091781261736935311"
+              "version": "0.3.539.46024",
+              "templateHash": "4767191790294689947"
             }
           },
           "parameters": {
