@@ -25,7 +25,28 @@ Param
     [string] $securityAlertEmail,
 
     [Parameter (Mandatory = $true)]
+    [string] $vNetPrefix,
+
+    [Parameter (Mandatory = $true)]
+    [string] $subnetControlPlanePrefix,
+
+    [Parameter (Mandatory = $true)]
+    [string] $subnetDataPlanePrefix,
+
+    [Parameter (Mandatory = $true)]
+    [string] $subnetPrivateLinkPrefix,
+
+    [Parameter (Mandatory = $false)]
     [string] $virtualApplianceIPAddress,
+
+    [Parameter (Mandatory = $true)]
+    [string] $sqlServerDBSkuName,
+
+    [Parameter (Mandatory = $true)]
+    [string] $sqlServerDBTierName,
+
+    [Parameter (Mandatory = $true)]
+    [string] $logRetentionInDays,
 
     [Parameter (Mandatory = $false)]
     [string] $ADAWTemplateSpecName = 'ADAW',
@@ -105,4 +126,4 @@ else {
 
 # Switch Context to the Target Subscription and provision ADAW
 $c = Set-AzContext -Subscription $targetSubscription
-New-AzResourceGroupDeployment -TemplateSpecId $tid -ResourceGroupName $targetResourceGroup -projectPrefix $projectPrefix -securityOwnerAADLogin $securityOwnerAADLogin -securityOwnerAADId $securityOwnerAADId -securityAlertEmail $securityAlertEmail -sqlServerLogin $sqlServerLogin -sqlServerPassword $sqlServerPassword -virtualApplianceIPAddress $virtualApplianceIPAddress
+New-AzResourceGroupDeployment -TemplateSpecId $tid -ResourceGroupName $targetResourceGroup -projectPrefix $projectPrefix -securityOwnerAADLogin $securityOwnerAADLogin -securityOwnerAADId $securityOwnerAADId -securityAlertEmail $securityAlertEmail -sqlServerLogin $sqlServerLogin -sqlServerPassword $sqlServerPassword -vNetPrefix $vNetPrefix -subnetControlPlanePrefix $subnetControlPlanePrefix -subnetDataPlanePrefix $subnetDataPlanePrefix -subnetPrivateLinkPrefix $subnetPrivateLinkPrefix -virtualApplianceIPAddress $virtualApplianceIPAddress -sqlServerDBSkuName $sqlServerDBSkuName -sqlServerDBTierName $sqlServerDBTierName -logRetentionInDays $logRetentionInDays
