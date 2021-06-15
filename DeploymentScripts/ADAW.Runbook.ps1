@@ -111,11 +111,14 @@ if ($targetResourceGroupTags -is [string] ) {
     $targetResourceGroupTags = Invoke-Expression $targetResourceGroupTags
 }
 
+# Switch Context to the Target Subscription
+$c = Set-AzContext -Subscription $targetSubscription
+
 # Try to get resource group - might or might not exists
-$rg = Get-AzResourceGroup -Name $targetResourceGroup -ErrorVariable notPresent -ErrorAction SilentlyContinue
+$rg = Get-AzResourceGroup | where { $_.ResourceGroupName -EQ $targetResourceGroup }
 
 # Create resource group if not exists and add or Update tags on Resource Group
-if ($notPresent) {
+if ($rg -eq $null) {
     $rg = New-AzResourceGroup -Name $targetResourceGroup -Location $targetResourceGroupLocation -Tag $targetResourceGroupTags 
 }
 else {
@@ -124,6 +127,5 @@ else {
     $t = Set-AzResourceGroup -Name $targetResourceGroup -Tag $targetResourceGroupTags
 }
 
-# Switch Context to the Target Subscription and provision ADAW
-$c = Set-AzContext -Subscription $targetSubscription
+# Provision ADAW
 New-AzResourceGroupDeployment -TemplateSpecId $tid -ResourceGroupName $targetResourceGroup -projectPrefix $projectPrefix -securityOwnerAADLogin $securityOwnerAADLogin -securityOwnerAADId $securityOwnerAADId -securityAlertEmail $securityAlertEmail -sqlServerLogin $sqlServerLogin -sqlServerPassword $sqlServerPassword -vNetPrefix $vNetPrefix -subnetControlPlanePrefix $subnetControlPlanePrefix -subnetDataPlanePrefix $subnetDataPlanePrefix -subnetPrivateLinkPrefix $subnetPrivateLinkPrefix -virtualApplianceIPAddress $virtualApplianceIPAddress -sqlServerDBSkuName $sqlServerDBSkuName -sqlServerDBTierName $sqlServerDBTierName -logRetentionInDays $logRetentionInDays
