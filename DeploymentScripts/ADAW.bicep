@@ -1143,7 +1143,7 @@ resource sql_AADAuth 'Microsoft.Sql/servers/administrators@2020-08-01-preview' =
 }
 
 resource sql_auditingRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: '55A640A4-E94B-4E75-B7DA-1312A7B66874'
+  name: guid('${projectPrefix}', resourceGroup().id, deployment().name)
   scope: sadiag
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe') // Storage Blob Data Contributor

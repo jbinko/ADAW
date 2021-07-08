@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.3.539.46024",
-      "templateHash": "12364151769941875615"
+      "version": "0.4.63.48766",
+      "templateHash": "4203479247773489616"
     }
   },
   "parameters": {
@@ -1277,7 +1277,7 @@
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-04-01-preview",
       "scope": "[format('Microsoft.Storage/storageAccounts/{0}', variables('saDiagUniqueName'))]",
-      "name": "55A640A4-E94B-4E75-B7DA-1312A7B66874",
+      "name": "[guid(parameters('projectPrefix'), resourceGroup().id, deployment().name)]",
       "properties": {
         "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
         "principalId": "[reference(resourceId('Microsoft.Sql/servers', variables('sqlServerUniqueName')), '2019-06-01-preview', 'Full').identity.principalId]",
@@ -1303,7 +1303,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName'))]",
         "[resourceId('Microsoft.Sql/servers', variables('sqlServerUniqueName'))]",
-        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName')), 'Microsoft.Authorization/roleAssignments', '55A640A4-E94B-4E75-B7DA-1312A7B66874')]"
+        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName')), 'Microsoft.Authorization/roleAssignments', guid(parameters('projectPrefix'), resourceGroup().id, deployment().name))]"
       ]
     },
     {
@@ -1761,8 +1761,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.3.539.46024",
-              "templateHash": "4767191790294689947"
+              "version": "0.4.63.48766",
+              "templateHash": "17874213338872998448"
             }
           },
           "parameters": {
