@@ -32,7 +32,7 @@ param location string = resourceGroup().location
 
 // Optional Parameter
 @description('Tags to be associated with deployed resources.')
-param resourceTags object = resourceGroup().tags
+param resourceTags object = (contains(resourceGroup(), 'tags') ? resourceGroup().tags : {} )
 
 // Optional Parameter
 @description('Address space of the Virtual Network.')
@@ -71,22 +71,23 @@ param sqlServerDBTierName string = 'Standard'
 param virtualApplianceIPAddress string = ''
 
 // ----- VARIABLES
+var lowerProjectPrefix = toLower(projectPrefix)
 
 var plBlobDnsZone = 'privatelink.blob.core.windows.net'
 var plDfsDnsZone = 'privatelink.dfs.core.windows.net'
 var plKvDnsZone = 'privatelink.vaultcore.azure.net'
 var plSqlDnsZone = 'privatelink.database.windows.net'
 
-var laUniqueName = '${projectPrefix}-adaw-la'
+var laUniqueName = '${lowerProjectPrefix}-adaw-la'
 
-var vNetName = '${projectPrefix}-adaw-vnet'
+var vNetName = '${lowerProjectPrefix}-adaw-vnet'
 var vNetNsgFlowLogRetentionInDays = 31
 var useDdosProtectionPlan = false
 
-var saDiagUniqueName = '${projectPrefix}adawdiagsa'
-var saLakeUniqueName = '${projectPrefix}adawlakesa'
+var saDiagUniqueName = '${lowerProjectPrefix}adawdiagsa'
+var saLakeUniqueName = '${lowerProjectPrefix}adawlakesa'
 
-var kvUniqueName = '${projectPrefix}-adaw-kv'
+var kvUniqueName = '${lowerProjectPrefix}-adaw-kv'
 var kvKeyPermissionsAll = [
   'backup'
   'create'
@@ -150,10 +151,10 @@ var kvStoragePermissionsAll = [
   'update'
 ]
 
-var adfUniqueName = '${projectPrefix}-adaw-adf'
+var adfUniqueName = '${lowerProjectPrefix}-adaw-adf'
 
-var sqlServerUniqueName = '${projectPrefix}-adaw-sql'
-var sqlServerDBUniqueName = '${projectPrefix}-adaw-sql-db'
+var sqlServerUniqueName = '${lowerProjectPrefix}-adaw-sql'
+var sqlServerDBUniqueName = '${lowerProjectPrefix}-adaw-sql-db'
 // Keep weekly backups for 1 week
 var sqlServerDBWeeklyRetention = 'P1W' // Valid value is between 1 to 520 weeks. e.g. P1Y, P1M, P1W or P7D.
 // Keep the first backup of each month for 1 month
@@ -162,7 +163,7 @@ var sqlServerDBMonthlyRetention = 'P1M' // Valid value is between 1 to 120 month
 var sqlServerDBYearlyRetention = 'P5Y' // Valid value is between 1 to 10 years. e.g. P1Y, P12M, P52W or P365D.
 var sqlServerDBWeekOfYear = 1 // The week of year to take the yearly backup. Value has to be between 1 and 52.
 
-var adbUniqueName = '${projectPrefix}-adaw-adb'
+var adbUniqueName = '${lowerProjectPrefix}-adaw-adb'
 
 var routeTableDef = {
   id: routeTable.id
@@ -299,14 +300,14 @@ resource la_diagnostics 'Microsoft.Insights/diagnosticSettings@2017-05-01-previe
 // ----- NETWORKING
 
 resource ddosProtectionPlan 'Microsoft.Network/ddosProtectionPlans@2020-08-01' = if (useDdosProtectionPlan) {
-  name: '${projectPrefix}-adaw-ddos-plan'
+  name: '${lowerProjectPrefix}-adaw-ddos-plan'
   location: location
   tags: resourceTags
   properties: {}
 }
 
 resource routeTable 'Microsoft.Network/routeTables@2020-08-01' = if (!empty(virtualApplianceIPAddress)) {
-  name: '${projectPrefix}-adaw-route-table'
+  name: '${lowerProjectPrefix}-adaw-route-table'
   location: location
   tags: resourceTags
   properties: {
@@ -325,7 +326,7 @@ resource routeTable 'Microsoft.Network/routeTables@2020-08-01' = if (!empty(virt
 }
 
 resource nsgControlPlane 'Microsoft.Network/networkSecurityGroups@2020-08-01' = {
-  name: '${projectPrefix}-adaw-nsg-control-plane'
+  name: '${lowerProjectPrefix}-adaw-nsg-control-plane'
   location: location
   tags: resourceTags
   properties: {
@@ -392,7 +393,7 @@ resource nsgControlPlane_diagnostics 'Microsoft.Insights/diagnosticSettings@2017
 }
 
 resource nsgDataPlane 'Microsoft.Network/networkSecurityGroups@2020-08-01' = {
-  name: '${projectPrefix}-adaw-nsg-data-plane'
+  name: '${lowerProjectPrefix}-adaw-nsg-data-plane'
   location: location
   tags: resourceTags
   properties: {
@@ -487,7 +488,7 @@ resource nsgDataPlane_diagnostics 'Microsoft.Insights/diagnosticSettings@2017-05
 }
 
 resource nsgPrivateLink 'Microsoft.Network/networkSecurityGroups@2020-08-01' = {
-  name: '${projectPrefix}-adaw-nsg-private-link'
+  name: '${lowerProjectPrefix}-adaw-nsg-private-link'
   location: location
   tags: resourceTags
   properties: {
@@ -1143,7 +1144,7 @@ resource sql_AADAuth 'Microsoft.Sql/servers/administrators@2020-08-01-preview' =
 }
 
 resource sql_auditingRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid('${projectPrefix}', resourceGroup().id, deployment().name)
+  name: guid('${lowerProjectPrefix}', resourceGroup().id, deployment().name)
   scope: sadiag
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe') // Storage Blob Data Contributor

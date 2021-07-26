@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.4.63.48766",
-      "templateHash": "4203479247773489616"
+      "version": "0.4.451.19169",
+      "templateHash": "13342340735903365600"
     }
   },
   "parameters": {
@@ -61,7 +61,7 @@
     },
     "resourceTags": {
       "type": "object",
-      "defaultValue": "[resourceGroup().tags]",
+      "defaultValue": "[if(contains(resourceGroup(), 'tags'), resourceGroup().tags, createObject())]",
       "metadata": {
         "description": "Tags to be associated with deployed resources."
       }
@@ -132,17 +132,18 @@
   },
   "functions": [],
   "variables": {
+    "lowerProjectPrefix": "[toLower(parameters('projectPrefix'))]",
     "plBlobDnsZone": "privatelink.blob.core.windows.net",
     "plDfsDnsZone": "privatelink.dfs.core.windows.net",
     "plKvDnsZone": "privatelink.vaultcore.azure.net",
     "plSqlDnsZone": "privatelink.database.windows.net",
-    "laUniqueName": "[format('{0}-adaw-la', parameters('projectPrefix'))]",
-    "vNetName": "[format('{0}-adaw-vnet', parameters('projectPrefix'))]",
+    "laUniqueName": "[format('{0}-adaw-la', variables('lowerProjectPrefix'))]",
+    "vNetName": "[format('{0}-adaw-vnet', variables('lowerProjectPrefix'))]",
     "vNetNsgFlowLogRetentionInDays": 31,
     "useDdosProtectionPlan": false,
-    "saDiagUniqueName": "[format('{0}adawdiagsa', parameters('projectPrefix'))]",
-    "saLakeUniqueName": "[format('{0}adawlakesa', parameters('projectPrefix'))]",
-    "kvUniqueName": "[format('{0}-adaw-kv', parameters('projectPrefix'))]",
+    "saDiagUniqueName": "[format('{0}adawdiagsa', variables('lowerProjectPrefix'))]",
+    "saLakeUniqueName": "[format('{0}adawlakesa', variables('lowerProjectPrefix'))]",
+    "kvUniqueName": "[format('{0}-adaw-kv', variables('lowerProjectPrefix'))]",
     "kvKeyPermissionsAll": [
       "backup",
       "create",
@@ -205,16 +206,16 @@
       "setsas",
       "update"
     ],
-    "adfUniqueName": "[format('{0}-adaw-adf', parameters('projectPrefix'))]",
-    "sqlServerUniqueName": "[format('{0}-adaw-sql', parameters('projectPrefix'))]",
-    "sqlServerDBUniqueName": "[format('{0}-adaw-sql-db', parameters('projectPrefix'))]",
+    "adfUniqueName": "[format('{0}-adaw-adf', variables('lowerProjectPrefix'))]",
+    "sqlServerUniqueName": "[format('{0}-adaw-sql', variables('lowerProjectPrefix'))]",
+    "sqlServerDBUniqueName": "[format('{0}-adaw-sql-db', variables('lowerProjectPrefix'))]",
     "sqlServerDBWeeklyRetention": "P1W",
     "sqlServerDBMonthlyRetention": "P1M",
     "sqlServerDBYearlyRetention": "P5Y",
     "sqlServerDBWeekOfYear": 1,
-    "adbUniqueName": "[format('{0}-adaw-adb', parameters('projectPrefix'))]",
+    "adbUniqueName": "[format('{0}-adaw-adb', variables('lowerProjectPrefix'))]",
     "routeTableDef": {
-      "id": "[resourceId('Microsoft.Network/routeTables', format('{0}-adaw-route-table', parameters('projectPrefix')))]"
+      "id": "[resourceId('Microsoft.Network/routeTables', format('{0}-adaw-route-table', variables('lowerProjectPrefix')))]"
     }
   },
   "resources": [
@@ -333,7 +334,7 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', variables('laUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -368,7 +369,7 @@
       "condition": "[variables('useDdosProtectionPlan')]",
       "type": "Microsoft.Network/ddosProtectionPlans",
       "apiVersion": "2020-08-01",
-      "name": "[format('{0}-adaw-ddos-plan', parameters('projectPrefix'))]",
+      "name": "[format('{0}-adaw-ddos-plan', variables('lowerProjectPrefix'))]",
       "location": "[parameters('location')]",
       "tags": "[parameters('resourceTags')]",
       "properties": {}
@@ -377,7 +378,7 @@
       "condition": "[not(empty(parameters('virtualApplianceIPAddress')))]",
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2020-08-01",
-      "name": "[format('{0}-adaw-route-table', parameters('projectPrefix'))]",
+      "name": "[format('{0}-adaw-route-table', variables('lowerProjectPrefix'))]",
       "location": "[parameters('location')]",
       "tags": "[parameters('resourceTags')]",
       "properties": {
@@ -397,7 +398,7 @@
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2020-08-01",
-      "name": "[format('{0}-adaw-nsg-control-plane', parameters('projectPrefix'))]",
+      "name": "[format('{0}-adaw-nsg-control-plane', variables('lowerProjectPrefix'))]",
       "location": "[parameters('location')]",
       "tags": "[parameters('resourceTags')]",
       "properties": {
@@ -434,9 +435,9 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
-      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-adaw-nsg-control-plane', parameters('projectPrefix')))]",
+      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-adaw-nsg-control-plane', variables('lowerProjectPrefix')))]",
       "name": "DiagnosticSettings",
       "properties": {
         "workspaceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
@@ -462,13 +463,13 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', parameters('projectPrefix')))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', variables('lowerProjectPrefix')))]"
       ]
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2020-08-01",
-      "name": "[format('{0}-adaw-nsg-data-plane', parameters('projectPrefix'))]",
+      "name": "[format('{0}-adaw-nsg-data-plane', variables('lowerProjectPrefix'))]",
       "location": "[parameters('location')]",
       "tags": "[parameters('resourceTags')]",
       "properties": {
@@ -533,9 +534,9 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
-      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-adaw-nsg-data-plane', parameters('projectPrefix')))]",
+      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-adaw-nsg-data-plane', variables('lowerProjectPrefix')))]",
       "name": "DiagnosticSettings",
       "properties": {
         "workspaceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
@@ -561,13 +562,13 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', parameters('projectPrefix')))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', variables('lowerProjectPrefix')))]"
       ]
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2020-08-01",
-      "name": "[format('{0}-adaw-nsg-private-link', parameters('projectPrefix'))]",
+      "name": "[format('{0}-adaw-nsg-private-link', variables('lowerProjectPrefix'))]",
       "location": "[parameters('location')]",
       "tags": "[parameters('resourceTags')]",
       "properties": {
@@ -632,9 +633,9 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
-      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-adaw-nsg-private-link', parameters('projectPrefix')))]",
+      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-adaw-nsg-private-link', variables('lowerProjectPrefix')))]",
       "name": "DiagnosticSettings",
       "properties": {
         "workspaceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
@@ -660,7 +661,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', parameters('projectPrefix')))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', variables('lowerProjectPrefix')))]"
       ]
     },
     {
@@ -681,7 +682,7 @@
             "properties": {
               "addressPrefix": "[parameters('subnetControlPlanePrefix')]",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', parameters('projectPrefix')))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', variables('lowerProjectPrefix')))]"
               },
               "routeTable": "[if(empty(parameters('virtualApplianceIPAddress')), json('null'), variables('routeTableDef'))]",
               "delegations": [
@@ -699,7 +700,7 @@
             "properties": {
               "addressPrefix": "[parameters('subnetDataPlanePrefix')]",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', parameters('projectPrefix')))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', variables('lowerProjectPrefix')))]"
               },
               "routeTable": "[if(empty(parameters('virtualApplianceIPAddress')), json('null'), variables('routeTableDef'))]",
               "delegations": [
@@ -717,7 +718,7 @@
             "properties": {
               "addressPrefix": "[parameters('subnetPrivateLinkPrefix')]",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', parameters('projectPrefix')))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', variables('lowerProjectPrefix')))]"
               },
               "privateEndpointNetworkPolicies": "Disabled"
             }
@@ -725,22 +726,22 @@
         ],
         "enableVmProtection": true,
         "enableDdosProtection": "[variables('useDdosProtectionPlan')]",
-        "ddosProtectionPlan": "[if(variables('useDdosProtectionPlan'), json(format('{{\"id\":\"{0}\"}}', resourceId('Microsoft.Network/ddosProtectionPlans', format('{0}-adaw-ddos-plan', parameters('projectPrefix'))))), json('null'))]"
+        "ddosProtectionPlan": "[if(variables('useDdosProtectionPlan'), json(format('{{\"id\":\"{0}\"}}', resourceId('Microsoft.Network/ddosProtectionPlans', format('{0}-adaw-ddos-plan', variables('lowerProjectPrefix'))))), json('null'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/ddosProtectionPlans', format('{0}-adaw-ddos-plan', parameters('projectPrefix')))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', parameters('projectPrefix')))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', parameters('projectPrefix')))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', parameters('projectPrefix')))]",
+        "[resourceId('Microsoft.Network/ddosProtectionPlans', format('{0}-adaw-ddos-plan', variables('lowerProjectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', variables('lowerProjectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', variables('lowerProjectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', variables('lowerProjectPrefix')))]",
         "[resourceId('Microsoft.Network/privateDnsZones', variables('plBlobDnsZone'))]",
         "[resourceId('Microsoft.Network/privateDnsZones', variables('plDfsDnsZone'))]",
         "[resourceId('Microsoft.Network/privateDnsZones', variables('plKvDnsZone'))]",
         "[resourceId('Microsoft.Network/privateDnsZones', variables('plSqlDnsZone'))]",
-        "[resourceId('Microsoft.Network/routeTables', format('{0}-adaw-route-table', parameters('projectPrefix')))]"
+        "[resourceId('Microsoft.Network/routeTables', format('{0}-adaw-route-table', variables('lowerProjectPrefix')))]"
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Network/virtualNetworks/{0}', variables('vNetName'))]",
       "name": "DiagnosticSettings",
@@ -990,7 +991,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.KeyVault/vaults/{0}', variables('kvUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -1083,7 +1084,7 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.DataFactory/factories/{0}', variables('adfUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -1277,7 +1278,7 @@
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-04-01-preview",
       "scope": "[format('Microsoft.Storage/storageAccounts/{0}', variables('saDiagUniqueName'))]",
-      "name": "[guid(parameters('projectPrefix'), resourceGroup().id, deployment().name)]",
+      "name": "[guid(variables('lowerProjectPrefix'), resourceGroup().id, deployment().name)]",
       "properties": {
         "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
         "principalId": "[reference(resourceId('Microsoft.Sql/servers', variables('sqlServerUniqueName')), '2019-06-01-preview', 'Full').identity.principalId]",
@@ -1303,7 +1304,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName'))]",
         "[resourceId('Microsoft.Sql/servers', variables('sqlServerUniqueName'))]",
-        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName')), 'Microsoft.Authorization/roleAssignments', guid(parameters('projectPrefix'), resourceGroup().id, deployment().name))]"
+        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName')), 'Microsoft.Authorization/roleAssignments', guid(variables('lowerProjectPrefix'), resourceGroup().id, deployment().name))]"
       ]
     },
     {
@@ -1393,7 +1394,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Sql/servers/{0}', variables('sqlServerUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -1438,7 +1439,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Sql/servers/{0}/databases/{1}', split(format('{0}/{1}', variables('sqlServerUniqueName'), variables('sqlServerDBUniqueName')), '/')[0], split(format('{0}/{1}', variables('sqlServerUniqueName'), variables('sqlServerDBUniqueName')), '/')[1])]",
       "name": "DiagnosticSettings",
@@ -1609,7 +1610,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Databricks/workspaces/{0}', variables('adbUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -1737,22 +1738,22 @@
             "value": "[variables('vNetNsgFlowLogRetentionInDays')]"
           },
           "nsgControlPlaneId": {
-            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', parameters('projectPrefix')))]"
+            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', variables('lowerProjectPrefix')))]"
           },
           "nsgControlPlaneName": {
-            "value": "[format('{0}-adaw-nsg-control-plane', parameters('projectPrefix'))]"
+            "value": "[format('{0}-adaw-nsg-control-plane', variables('lowerProjectPrefix'))]"
           },
           "nsgDataPlaneId": {
-            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', parameters('projectPrefix')))]"
+            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', variables('lowerProjectPrefix')))]"
           },
           "nsgDataPlaneName": {
-            "value": "[format('{0}-adaw-nsg-data-plane', parameters('projectPrefix'))]"
+            "value": "[format('{0}-adaw-nsg-data-plane', variables('lowerProjectPrefix'))]"
           },
           "nsgPrivateLinkId": {
-            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', parameters('projectPrefix')))]"
+            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', variables('lowerProjectPrefix')))]"
           },
           "nsgPrivateLinkName": {
-            "value": "[format('{0}-adaw-nsg-private-link', parameters('projectPrefix'))]"
+            "value": "[format('{0}-adaw-nsg-private-link', variables('lowerProjectPrefix'))]"
           }
         },
         "template": {
@@ -1761,8 +1762,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.63.48766",
-              "templateHash": "17874213338872998448"
+              "version": "0.4.451.19169",
+              "templateHash": "13061650851824984307"
             }
           },
           "parameters": {
@@ -1897,9 +1898,9 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', parameters('projectPrefix')))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', parameters('projectPrefix')))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', parameters('projectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-control-plane', variables('lowerProjectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-data-plane', variables('lowerProjectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-adaw-nsg-private-link', variables('lowerProjectPrefix')))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName'))]"
       ]
     }
